@@ -1,0 +1,1081 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>La Joya · Todo lo que buscas — Catálogo, negocios y servicios del distrito | Arequipa, Perú</title>
+<meta name="description" content="Plataforma digital del distrito de La Joya, Arequipa: catálogo de productos, directorio de negocios, pedidos con delivery, mapa interactivo, tarifas de transporte, empleos y asistente Joya AI.">
+<meta name="keywords" content="La Joya, Arequipa, catálogo, compras locales, delivery, picanterías, mercados, transporte, empleos, turismo, La Yarada, páprika">
+<link rel="canonical" href="https://lajoya.pe/">
+<meta name="author" content="Municipalidad Distrital de La Joya">
+<meta name="theme-color" content="#C25A2B">
+<meta property="og:type" content="website">
+<meta property="og:title" content="La Joya — Todo lo que buscas">
+<meta property="og:description" content="Catálogo, negocios, delivery, mapa y servicios del distrito de La Joya, Arequipa.">
+<meta property="og:image" content="https://picsum.photos/seed/lajoya-og/1200/630.jpg">
+<meta property="og:locale" content="es_PE">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23C25A2B'/%3E%3Ccircle cx='12' cy='12' r='4' fill='%23F6F1E5'/%3E%3C/svg%3E">
+<script type="application/ld+json">
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="css/style.css">
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- ============================================================
+     CONFIGURACION DEL BACKEND
+     Cambia esta URL si tu backend PHP esta en otra direccion:
+     - XAMPP local:    http://localhost/php-backend/api
+     - Hosting real:   https://tu-dominio.com/api
+     Si no hay backend, la pagina funciona con localStorage (modo demo).
+     ============================================================ -->
+<script>window.LJ_API_BASE = 'http://localhost/php-backend/api';</script>
+
+<!-- ORDEN DE CARGA DE SCRIPTS (NO CAMBIAR EL ORDEN) -->
+<script src="js/lajoya-core.js"></script>       <!-- 1. Datos base + helpers -->
+<script src="js/lajoya-api.js"></script>        <!-- 2. Cliente API (puente con PHP/MySQL) -->
+<script src="js/lajoya-commerce.js"></script>   <!-- 3. Carrito, catalogo, checkout -->
+<script src="js/lajoya-app.js"></script>        <!-- 4. Auth, chat, modales -->
+<script src="js/inf.js"></script>               <!-- 5. Inicializacion final -->
+
+</head>
+<body>
+
+<!-- ================= PRELOADER ================= -->
+<div id="preloader" aria-hidden="true">
+  <div class="pre-name">LA JOYA</div>
+  <div class="pre-bar"><i></i></div>
+  <div class="pre-sub">Arequipa · Perú</div>
+</div>
+
+<div id="scrollbar" aria-hidden="true"></div>
+
+<!-- ============================================================
+     HEADER E-COMMERCE
+     ============================================================ -->
+<header class="site" id="siteHeader">
+
+  <div class="h-top">
+    <div class="wrap h-top-in">
+
+      <a class="brand" href="#inicio">
+        <span class="brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+        </span>
+        <span>La Joya<small>Todo lo que buscas</small></span>
+      </a>
+
+      <!-- Buscador global con búsqueda predictiva -->
+      <form class="h-search" id="hSearchForm" role="search" autocomplete="off">
+        <input type="text" id="hSearch" autocomplete="off"
+               placeholder="Busca en La Joya: queso, mototaxi, ferretería, picantería…"
+               aria-label="Buscar en el distrito">
+        <button type="button" class="hs-cam" id="hsCam" aria-label="Búsqueda con imagen" data-action="img-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        </button>
+        <button type="submit" class="hs-go" aria-label="Buscar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </button>
+        <div class="gs-drop" id="gsDrop" hidden></div>
+      </form>
+
+      <!-- Utilidades -->
+      <div class="h-utils">
+
+        <div class="pop-wrap">
+          <button class="hu-item" id="appBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14h1M14 20h1M18 18h3v3h-3z"/></svg>
+            <span class="hu-txt">Descarga la app<br><b>de La Joya</b></span>
+          </button>
+          <div class="pop" id="appPop">
+            <svg class="qr" viewBox="0 0 100 100" aria-hidden="true">
+              <rect x="4" y="4" width="26" height="26" fill="#231E17"/><rect x="9" y="9" width="16" height="16" fill="#fff"/><rect x="13" y="13" width="8" height="8" fill="#231E17"/>
+              <rect x="70" y="4" width="26" height="26" fill="#231E17"/><rect x="75" y="9" width="16" height="16" fill="#fff"/><rect x="79" y="13" width="8" height="8" fill="#231E17"/>
+              <rect x="4" y="70" width="26" height="26" fill="#231E17"/><rect x="9" y="75" width="16" height="16" fill="#fff"/><rect x="13" y="79" width="8" height="8" fill="#231E17"/>
+              <rect x="38" y="38" width="8" height="8" fill="#C25A2B"/><rect x="54" y="38" width="6" height="6" fill="#231E17"/><rect x="66" y="42" width="6" height="6" fill="#231E17"/><rect x="80" y="38" width="8" height="8" fill="#231E17"/><rect x="38" y="54" width="6" height="6" fill="#231E17"/><rect x="52" y="52" width="8" height="8" fill="#231E17"/><rect x="68" y="56" width="6" height="6" fill="#231E17"/><rect x="84" y="52" width="6" height="6" fill="#231E17"/>
+              <rect x="38" y="70" width="6" height="6" fill="#231E17"/><rect x="52" y="74" width="6" height="6" fill="#231E17"/><rect x="64" y="70" width="8" height="8" fill="#231E17"/><rect x="80" y="70" width="6" height="6" fill="#231E17"/><rect x="44" y="84" width="6" height="6" fill="#231E17"/><rect x="60" y="86" width="6" height="6" fill="#231E17"/><rect x="74" y="82" width="6" height="6" fill="#231E17"/><rect x="86" y="86" width="6" height="6" fill="#231E17"/>
+            </svg>
+            <p>Escanea con tu celular y lleva el distrito en tu bolsillo.</p>
+            <button class="btn btn-solid" id="appSend" style="width:100%;justify-content:center;font-size:.7rem;padding:11px">Enviarme el enlace</button>
+          </div>
+        </div>
+
+        <!-- Moneda -->
+        <div class="pop-wrap">
+          <button class="hu-item" id="curBtn">
+            <span class="cur-flag" id="curFlag">🇵🇪</span>
+            <span class="hu-txt">Moneda<br><b id="curLabel">PEN ▾</b></span>
+          </button>
+          <div class="pop" id="curPop">
+            <h5>Elige tu moneda</h5>
+            <div id="curList"></div>
+            <p class="pop-note" id="curNote">Tipo de cambio — modo demostración</p>
+          </div>
+        </div>
+
+        <!-- Cuenta -->
+        <div class="pop-wrap hu-acct-wrap">
+          <button class="hu-item" id="acctBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span class="hu-txt" id="acctLabel">¡Bienvenido!<br><b>Identifícate</b></span>
+          </button>
+          <div class="pop" id="acctPop"></div>
+        </div>
+
+        <!-- Favoritos -->
+        <div class="pop-wrap">
+          <button class="hu-item" id="favBtn" aria-label="Mis favoritos" data-action="favs-open">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <span class="cart-badge heart" id="favCount">0</span>
+            <span class="hu-txt"><b>Favoritos</b></span>
+          </button>
+        </div>
+
+        <!-- Carrito -->
+        <div class="pop-wrap hu-cart-wrap">
+          <button class="hu-item" id="cartBtn" aria-label="Carrito de compras">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+            <span class="cart-badge" id="cartCount">0</span>
+            <span class="hu-txt"><b>Carrito</b></span>
+          </button>
+          <div class="pop" id="cartPop">
+            <h5>Tu carrito</h5>
+            <div id="cartMiniList"></div>
+            <div class="cp-sub">Subtotal: <b data-pen="0" id="cartMiniSub">S/ 0.00</b></div>
+            <div class="cp-foot">
+              <button class="btn btn-ghost" data-action="open-cart">Ver carrito</button>
+              <button class="btn btn-solid" data-action="checkout-open">Finalizar compra</button>
+            </div>
+          </div>
+        </div>
+
+        <button class="burger" id="burgerBtn" aria-label="Abrir menú" data-action="menu-open">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fila de categorías -->
+  <div class="h-cats" id="hCats">
+    <div class="wrap h-cats-in">
+
+      <div class="pop-wrap">
+        <button class="hc-all" id="allCatsBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+          Todas las categorías
+        </button>
+        <div class="pop left" id="allCatsPop">
+          <h5>Explora el catálogo</h5>
+          <div id="allCatsList"></div>
+        </div>
+      </div>
+
+      <nav class="hc-links" aria-label="Secciones del portal">
+        <a href="#catalogo" class="hot">Catálogo</a>
+        <a href="#directorio" data-sec="directorio">Directorio</a>
+        <a href="#mapa">Mapa</a>
+        <a href="#quepasa" data-sec="quepasa">¿Qué pasa?</a>
+        <a href="#empleo" data-sec="empleo">Trabajo</a>
+        <a href="#transporte" data-sec="transporte">Transporte</a>
+        <a href="#integra">Integraciones</a>
+      </nav>
+
+      <div class="pop-wrap hc-more-wrap">
+        <button class="hc-more" id="moreBtn">
+          Más
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div class="pop" id="morePop">
+          <button class="pop-item" data-goto="#transforma"><i class="cdot"></i>Transformación digital</button>
+          <button class="pop-item" data-action="analytics-open"><i class="cdot"></i>Analítica de La Joya</button>
+          <button class="pop-item" data-action="webhook-log-open"><i class="cdot"></i>Registro de webhooks</button>
+          <button class="pop-item" data-action="open-biz-modal"><i class="cdot"></i>Publica tu negocio</button>
+          <button class="pop-item" data-action="panel-open" data-tab="dash"><i class="cdot"></i>Panel de mi negocio</button>
+          <button class="pop-item" data-goto="#contacto"><i class="cdot"></i>Contacto municipal</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= MENÚ MÓVIL ================= -->
+<div id="mobileMenu" aria-hidden="true">
+  <button class="mm-close" id="mmClose" aria-label="Cerrar menú" data-action="menu-close">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+  </button>
+  <a class="mm-link" href="#inicio">Inicio <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="mm-link" href="#catalogo">Catálogo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="mm-link" href="#directorio">Directorio <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="mm-link" href="#mapa">Mapa de negocios <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="mm-link" href="#empleo">Trabajo <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="mm-link" href="#transporte">Transporte <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <a class="mm-link" href="#integra">Integraciones <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg></a>
+  <button class="mm-link" data-action="favs-open">Mis favoritos</button>
+  <button class="mm-link" data-action="orders-open">Mis pedidos</button>
+  <button class="mm-link" data-action="analytics-open">Analítica</button>
+  <button class="mm-link" data-action="panel-open" data-tab="dash">Panel de mi negocio</button>
+  <div class="mm-foot">Plataforma demostrativa · Municipalidad Distrital de La Joya</div>
+</div>
+
+<main>
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="inicio">
+    <div class="wrap">
+      <div class="hero-top">
+        <span class="label">Distrito de Arequipa — Valle y desierto</span>
+        <span class="hero-year" id="weatherChip">Consultando clima del valle…</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="ht-line">LA <span class="ht-chip"><img src="https://picsum.photos/seed/lajoya-valle/480/300.jpg" alt="Valle agrícola de La Joya"></span> JOYA</span>
+        <span class="ht-line"><em class="ht-em">todo lo que buscas, aquí</em></span>
+      </h1>
+      <div class="hero-row">
+        <p class="hero-desc">
+          El valle que despunta páprika para el mundo, la feria dominical más querida del sur,
+          arenales para rodar sin límites y una comunidad que emprende. Bienvenido al portal
+          del distrito: <strong>busca, compra, muévete, trabaja y vende en La Joya</strong>.
+        </p>
+        <div class="hero-btns">
+          <a class="btn btn-solid" href="#catalogo">
+            Explorar el catálogo
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </a>
+          <button class="btn btn-ghost" id="heroAI" data-action="chat-open">
+            Pregunta a Joya AI
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="hero-media">
+        <img src="https://picsum.photos/seed/lajoya-panoramica/1800/760.jpg" alt="Panorámica del valle y el desierto de La Joya">
+        <span class="hero-caption">Valle de La Joya · Ruta Panamericana Sur</span>
+      </div>
+      <div class="stamp"><img src="img/Escudo_La_Joya_Perú.png" alt="Escudo de La Joya" onerror="this.src='https://picsum.photos/seed/lj-escudo/300/300.jpg'"></div>
+
+      <div class="hero-meta">
+        <div class="hm"><b>≈ 1 250 m</b><span>Altitud del valle</span></div>
+        <div class="hm"><b>1955</b><span>Aniversario del distrito · enero</span></div>
+        <div class="hm"><b>45 min</b><span>De Arequipa por la Panamericana</span></div>
+        <div class="hm"><b>1.er lugar</b><span>Páprika y cebolla agroexportada</span></div>
+      </div>
+    </div>
+
+    <div class="marquee" aria-hidden="true">
+      <div class="marq-track">
+        <div class="marq-group"><span>Feria Dominical</span><i class="dot"></i><span>Valle agroexportador</span><i class="dot"></i><span>Arenales y dunas</span><i class="dot"></i><span>Plaza de Armas</span><i class="dot"></i><span>Expo Joya</span><i class="dot"></i><span>Virgen del Carmen</span><i class="dot"></i><span>Mercado Central</span><i class="dot"></i></div>
+        <div class="marq-group"><span>Feria Dominical</span><i class="dot"></i><span>Valle agroexportador</span><i class="dot"></i><span>Arenales y dunas</span><i class="dot"></i><span>Plaza de Armas</span><i class="dot"></i><span>Expo Joya</span><i class="dot"></i><span>Virgen del Carmen</span><i class="dot"></i><span>Mercado Central</span><i class="dot"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= EL DISTRITO ================= -->
+  <section class="distrito" id="distrito">
+    <div class="wrap dis-grid">
+      <div class="dis-text reveal">
+        <span class="label">01 — El distrito</span>
+        <h2 class="sec-title" style="margin-top:18px">Donde el desierto <em>florece de emprendimiento</em></h2>
+        <p>
+          La Joya es un valle irrigado en mitad del desierto arequipeño. Gracias al agua
+          de sus canales, la tierra roja se cubre de <strong>páprika, cebolla, alfalfa y maíz</strong>
+          que viajan a los mercados de Lima y a puertos de exportación. Alrededor del campo
+          floreció todo lo demás: bodegas, talleres, transportes, picanterías y miles de
+          vecinos que cada día convierten este rincón en un huevo de emprendedores.
+        </p>
+        <p>
+          Los fines de semana el distrito cambia de ritmo: la <strong>feria dominical</strong> reúne
+          a productores y compradores desde el amanecer, y los <strong>arenales</strong> se llenan
+          de cuatrimotos y 4×4. Aquí no hay que inventar planes: La Joya los tiene todos.
+        </p>
+        <blockquote class="dis-quote">"En La Joya nadie espera que le llueva: aquí el progreso se riega con trabajo."</blockquote>
+      </div>
+      <div class="dis-side reveal">
+        <div class="dis-img"><img src="https://picsum.photos/seed/lajoya-plaza/600/750.jpg" alt="Plaza de Armas de La Joya"></div>
+        <div class="dis-img"><img src="https://picsum.photos/seed/lajoya-feria/600/750.jpg" alt="Puestos de la feria dominical"></div>
+        <div class="dis-stat"><b>30 000+</b><span>vecinos que hacen girar el valle</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CATÁLOGO ================= -->
+  <section class="catalogo" id="catalogo">
+    <div class="wrap">
+      <div class="dir-head reveal">
+        <div>
+          <span class="label">02 — Tienda del distrito</span>
+          <h2 class="sec-title" style="margin-top:16px">Catálogo de <em>La Joya</em></h2>
+          <p>Productos y servicios de los negocios joyanos. Compra online con delivery local o recojo en tienda.</p>
+        </div>
+        <span class="dir-count" id="prodCount"></span>
+      </div>
+
+      <div class="chips-row reveal" id="catChips">
+        <button class="chip on" data-action="cat-chip" data-cat="todo">Todo</button>
+      </div>
+
+      <div class="cat-tools reveal">
+        <div class="fgroup"><label>Ordenar</label>
+          <select class="field" id="fSort">
+            <option value="rel">Relevancia</option>
+            <option value="precio-asc">Precio: menor a mayor</option>
+            <option value="precio-desc">Precio: mayor a menor</option>
+            <option value="populares">Más vendidos</option>
+            <option value="calificacion">Mejor calificados</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>Calificación</label>
+          <select class="field" id="fRating">
+            <option value="0">Todas</option><option value="4">4 ★ o más</option><option value="4.5">4.5 ★ o más</option>
+          </select>
+        </div>
+        <div class="fgroup"><label>Zona</label>
+          <select class="field" id="fZone"><option value="todo">Toda La Joya</option></select>
+        </div>
+        <div class="fgroup"><label>Precio mín. (S/)</label><input class="field" type="number" id="fMin" min="0" placeholder="0"></div>
+        <div class="fgroup"><label>Precio máx. (S/)</label><input class="field" type="number" id="fMax" min="0" placeholder="∞"></div>
+        <button class="chip" id="fOffer" data-action="toggle-offer">🏷 Solo ofertas</button>
+        <button class="chip" id="fAvail" data-action="toggle-avail">✓ Solo disponibles</button>
+        <button class="chip ghost" data-action="clear-filters" id="fClear">Limpiar filtros</button>
+      </div>
+      <div class="q-echo" id="qEcho" hidden></div>
+
+      <div class="prod-grid" id="prodGrid"></div>
+      <div class="dir-empty" id="prodEmpty" hidden>
+        <b>Sin resultados… por ahora</b>
+        Prueba con otros términos o limpia los filtros.
+        <button class="chip" data-action="clear-filters" style="margin-left:6px">Limpiar filtros</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= LUGARES (carrusel) ================= -->
+  <section class="lugares" id="lugares">
+    <div class="wrap">
+      <div class="lug-head reveal">
+        <div>
+          <span class="label">03 — Lo mejor del distrito</span>
+          <h2 class="sec-title" style="margin-top:16px">Seis paradas <em>que no te puedes saltar</em></h2>
+          <p>Arrastra el carrusel o usa las flechas. Cada rincón tiene su propia historia.</p>
+        </div>
+        <div class="car-nav">
+          <button class="car-btn" id="carPrev" aria-label="Anterior"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+          <button class="car-btn" id="carNext" aria-label="Siguiente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+        </div>
+      </div>
+
+      <div class="car-viewport reveal" id="carViewport" tabindex="0" aria-roledescription="carrusel" aria-label="Lugares de La Joya">
+        <div class="car-track" id="carTrack">
+          <article class="car-slide">
+            <div class="car-imgwrap"><img src="img/OASIS.jpg" alt="El Oasis de La Joya" onerror="this.src='https://picsum.photos/seed/lj-oasis/900/600.jpg'"></div>
+            <div class="car-info">
+              <span class="ci-num">01</span><span class="ci-tag">Corazón del distrito</span>
+              <h3>El Oasis de La Joya</h3>
+              <p>Paraje desértico nacido del afloramiento de aguas subterráneas de las irrigaciones de La Cano. Dunas, palmeras y aguas cristalinas con pequeños peces.</p>
+              <div class="ci-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Zona baja del valle</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Siempre abierto</span>
+              </div>
+              <button class="btn btn-ghost sm" data-action="open-place" data-id="l1">Ver en el mapa</button>
+            </div>
+          </article>
+          <article class="car-slide">
+            <div class="car-imgwrap"><img src="img/las_dunas.jpg" alt="Dunas de La Joya" onerror="this.src='https://picsum.photos/seed/lj-dunas/900/600.jpg'"></div>
+            <div class="car-info">
+              <span class="ci-num">02</span><span class="ci-tag">Aventura</span>
+              <h3>Las Dunas y Sandboarding</h3>
+              <p>Pendientes de arena fina perfectas para off-road en 4×4 y tubulares. La parada técnica incluye deslizarse en tabla desde las cimas desérticas.</p>
+              <div class="ci-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Panamericana Sur</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Tours con cita</span>
+              </div>
+              <button class="btn btn-ghost sm" data-action="open-place" data-id="l2">Ver en el mapa</button>
+            </div>
+          </article>
+          <article class="car-slide">
+            <div class="car-imgwrap"><img src="img/cataratyas.jpg" alt="Cataratas de La Cano" onerror="this.src='https://picsum.photos/seed/lj-cano/900/600.jpg'"></div>
+            <div class="car-info">
+              <span class="ci-num">03</span><span class="ci-tag">Naturaleza</span>
+              <h3>Cataratas de La Cano</h3>
+              <p>Un contraste fascinante en medio del desierto. La caída de agua del sector de La Cano es un hermoso atractivo natural con verdor a su alrededor.</p>
+              <div class="ci-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Ruta a La Yarada</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Visitas guiadas</span>
+              </div>
+              <button class="btn btn-ghost sm" data-action="open-place" data-id="l3">Ver en el mapa</button>
+            </div>
+          </article>
+          <article class="car-slide">
+            <div class="car-imgwrap"><img src="img/plazaLaJoya.jpeg" alt="Plaza de Armas de La Joya" onerror="this.src='https://picsum.photos/seed/lj-plaza/900/600.jpg'"></div>
+            <div class="car-info">
+              <span class="ci-num">04</span><span class="ci-tag">Comercio</span>
+              <h3>El Cruce de La Joya</h3>
+              <p>El corazón comercial y neurálgico del distrito: mercado local, transporte hacia cualquier punto y la parada ideal de viajeros.</p>
+              <div class="ci-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Cruce La Joya</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Todo el día</span>
+              </div>
+              <button class="btn btn-ghost sm" data-action="open-place" data-id="l5">Ver en el mapa</button>
+            </div>
+          </article>
+          <article class="car-slide">
+            <div class="car-imgwrap"><img src="img/48.jpg" alt="Parada 48 de La Joya" onerror="this.src='https://picsum.photos/seed/lj-p48/900/600.jpg'"></div>
+            <div class="car-info">
+              <span class="ci-num">05</span><span class="ci-tag">Sabor local</span>
+              <h3>Parada 48</h3>
+              <p>Menús caseros, quesos de altura, fruta del valle y la mejor causa joyana. Pregunta por el aderezo de rocoto: te vas a quedar.</p>
+              <div class="ci-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Jr. Constitución</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>8:00 – 18:00</span>
+              </div>
+              <button class="btn btn-ghost sm" data-action="open-place" data-id="l4">Ver en el mapa</button>
+            </div>
+          </article>
+          <article class="car-slide">
+            <div class="car-imgwrap"><img src="https://picsum.photos/seed/lajoya-piscinas/1400/880.jpg" alt="Piscinas campestres de La Joya"></div>
+            <div class="car-info">
+              <span class="ci-num">06</span><span class="ci-tag">Familia</span>
+              <h3>Piscinas campestres</h3>
+              <p>Balnearios de agua templada con parrillas, canchas y quinchos. El plan dominical de las familias joyanas cuando aprieta el sol del desierto.</p>
+              <div class="ci-meta">
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Periferia del valle</span>
+                <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Entrada desde S/ 5</span>
+              </div>
+              <button class="btn btn-ghost sm" data-action="open-place" data-id="l6">Ver en el mapa</button>
+            </div>
+          </article>
+        </div>
+      </div>
+
+      <div class="car-foot">
+        <span class="car-count" id="carCount">01 <small>/ 06</small></span>
+        <div class="car-progress"><i id="carBar"></i></div>
+        <div class="car-dots" id="carDots" role="tablist" aria-label="Seleccionar lugar"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ¿QUÉ ESTÁ PASANDO? ================= -->
+  <section class="quepasa" id="quepasa">
+    <div class="wrap">
+      <div class="qp-head reveal">
+        <span class="label">04 — ¿Qué está pasando en La Joya?</span>
+        <h2 class="sec-title" style="margin-top:16px">El distrito, <em>día a día</em></h2>
+      </div>
+
+      <div class="marquee reveal" style="margin-top:0;background:#fff" aria-hidden="true">
+        <div class="marq-track">
+          <div class="marq-group"><span style="color:var(--accent)">EN VIVO</span><i class="dot"></i><span>Inscripciones abiertas: liga de fútbol 7 municipal</span><i class="dot"></i><span>Campaña gratuita de esterilización de mascotas — Plaza de Armas</span><i class="dot"></i><span>Puente peatonal de La Yarada al 80 % de avance</span><i class="dot"></i><span>Nuevo módulo de atención SERVIR los sábados</span><i class="dot"></i></div>
+          <div class="marq-group"><span style="color:var(--accent)">EN VIVO</span><i class="dot"></i><span>Inscripciones abiertas: liga de fútbol 7 municipal</span><i class="dot"></i><span>Campaña gratuita de esterilización de mascotas — Plaza de Armas</span><i class="dot"></i><span>Puente peatonal de La Yarada al 80 % de avance</span><i class="dot"></i><span>Nuevo módulo de atención SERVIR los sábados</span><i class="dot"></i></div>
+        </div>
+      </div>
+
+      <div class="atn-grid reveal" style="margin-top:clamp(26px,4vh,44px)">
+        <div class="atn-card">
+          <span class="atn-status" id="atnStatus"><i class="dot-live"></i><span id="atnText">Consultando horario…</span></span>
+          <h3>Ventana de atención al ciudadano</h3>
+          <p>Trámites, libreta sanitaria, licencias de negocio, Orientación Legal Gratuita (OLP) y consultas vecinales. Plaza de Armas s/n.</p>
+          <ul class="atn-hours">
+            <li><span>Lunes a viernes</span><b>8:00 a. m. – 4:00 p. m.</b></li>
+            <li><span>Sábados (módulo SERVIR)</span><b>8:00 a. m. – 1:00 p. m.</b></li>
+            <li><span>Domingos</span><b>Cerrado · feria dominical</b></li>
+          </ul>
+          <button class="btn btn-ghost-inv" id="atnBtn" data-action="chat-open" data-q="Quiero agendar un trámite">
+            Agendar un trámite
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+        </div>
+        <div class="agenda">
+          <h3>Agenda joyana</h3>
+          <p>Lo que viene en el distrito, mes a mes.</p>
+          <div id="agendaList"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= MAPA GENERAL ================= -->
+  <section class="seccion-mapa" id="mapa">
+    <div class="wrap">
+      <div class="dir-head reveal">
+        <div>
+          <span class="label">05 — Negocios cerca de ti</span>
+          <h2 class="sec-title" style="margin-top:16px">Todo La Joya, <em>en un mapa</em></h2>
+          <p>Mapa interactivo con tiendas, restaurantes, servicios, farmacias, transporte y turismo. Haz clic en un marcador para ver su ficha.</p>
+        </div>
+      </div>
+      <div class="chips-row reveal" id="mapChips">
+        <button class="chip on" data-action="map-chip" data-f="todos">Mostrar todos</button>
+        <button class="chip" data-action="map-chip" data-f="cerca">📍 Cerca de mí</button>
+        <button class="chip" data-action="map-chip" data-f="comida">🍴 Restaurantes</button>
+        <button class="chip" data-action="map-chip" data-f="tiendas">🛒 Tiendas</button>
+        <button class="chip" data-action="map-chip" data-f="servicios">🔧 Servicios</button>
+        <button class="chip" data-action="map-chip" data-f="farmacias">💊 Farmacias</button>
+        <button class="chip" data-action="map-chip" data-f="transporte">🚕 Transporte</button>
+        <button class="chip" data-action="map-chip" data-f="turismo">🏨 Turismo</button>
+      </div>
+      <div class="map-wrap reveal">
+        <div id="map" aria-label="Mapa de La Joya"></div>
+        <div class="map-fallback" id="mapFallback" hidden>
+          <b>Mapa no disponible sin conexión</b>
+          Puedes ver cada negocio con enlaces directos a OpenStreetMap desde su ficha en el directorio.
+        </div>
+      </div>
+      <p class="map-note">Mapa © OpenStreetMap · Leaflet — requiere internet para cargar el mapa base.</p>
+    </div>
+  </section>
+
+  <!-- ================= DIRECTORIO ================= -->
+  <section class="directorio" id="directorio">
+    <div class="wrap">
+      <div class="dir-head reveal">
+        <div>
+          <span class="label">06 — Todo lo que buscas en La Joya</span>
+          <h2 class="sec-title" style="margin-top:16px">Escríbelo… <em>La Joya lo tiene</em></h2>
+          <p>Busca por nombre o filtra por rubro. Cada ficha tiene ubicación, horario y WhatsApp directo.</p>
+        </div>
+      </div>
+
+      <div class="dir-bar reveal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="dir-input" id="dirSearch" type="text" placeholder="Busca: quesos, mototaxi, ferretería, peluquería…" aria-label="Buscar en el directorio">
+        <span class="dir-count" id="dirCount"></span>
+      </div>
+
+      <div class="chips-row reveal" id="dirChips">
+        <button class="chip on" data-action="dir-chip" data-cat="todo">Todo</button>
+        <button class="chip" data-action="dir-chip" data-cat="comida">Comida</button>
+        <button class="chip" data-action="dir-chip" data-cat="mercados">Mercados y compras</button>
+        <button class="chip" data-action="dir-chip" data-cat="servicios">Servicios</button>
+        <button class="chip" data-action="dir-chip" data-cat="salud">Salud</button>
+        <button class="chip" data-action="dir-chip" data-cat="transporte">Transporte</button>
+        <button class="chip" data-action="dir-chip" data-cat="turismo">Turismo y ocio</button>
+      </div>
+
+      <div class="dir-grid" id="dirGrid"></div>
+      <div class="dir-empty" id="dirEmpty" hidden>
+        <b>Sin resultados… por ahora</b>
+        Ese negocio aún no está en el directorio. Si es tuyo,
+        <button class="chip" data-action="open-biz-modal" style="margin-left:6px">agrégalo gratis aquí</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TRABAJO ================= -->
+  <section class="empleo" id="empleo">
+    <div class="wrap">
+      <div class="emp-head reveal">
+        <div>
+          <span class="label">07 — Trabajo en La Joya</span>
+          <h2 class="sec-title" style="margin-top:16px">Vacantes que <em>pesan en soles</em></h2>
+          <p>Ofertas del valle, del comercio local y convocatorias CAS. Postula y guarda tus favoritas.</p>
+        </div>
+        <button class="btn btn-ghost" data-action="profile-open" data-tab="apps">
+          Mis postulaciones
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </button>
+      </div>
+
+      <div class="dir-bar reveal" style="max-width:520px;margin-bottom:18px">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input class="dir-input" id="empSearch" type="text" placeholder="Buscar empleo: chofer, vendedor, agrícola…" aria-label="Buscar empleo">
+      </div>
+
+      <div class="chips-row reveal" id="empChips">
+        <button class="chip on" data-action="emp-chip" data-cat="todas">Todas</button>
+        <button class="chip" data-action="emp-chip" data-cat="agricultura">Agricultura</button>
+        <button class="chip" data-action="emp-chip" data-cat="comercio">Comercio</button>
+        <button class="chip" data-action="emp-chip" data-cat="servicios">Servicios</button>
+        <button class="chip" data-action="emp-chip" data-cat="transporte">Transporte</button>
+        <button class="chip" data-action="emp-chip" data-cat="estado">Estado / CAS</button>
+      </div>
+
+      <div class="emp-grid" id="empGrid"></div>
+
+      <p class="emp-note reveal">¿Buscas capacitación gratuita? Pregunta por los cursos SENATI y CEPROSEL en la <a href="#quepasa">ventana de atención</a>.</p>
+    </div>
+  </section>
+
+  <!-- ================= TRANSPORTE ================= -->
+  <section class="transporte" id="transporte">
+    <div class="wrap">
+      <div class="tr-head reveal">
+        <span class="label">08 — Cómo moverte desde y hacia La Joya</span>
+        <h2 class="sec-title" style="margin-top:16px">Tarifas claras, <em>sin sorpresas</em></h2>
+      </div>
+
+      <div class="tr-grid reveal">
+        <div class="tr-calc">
+          <h3>Calcula tu pasaje</h3>
+          <p>Elige origen, destino y tipo de transporte: precio referencial, tiempo, ruta y distancia.</p>
+          <div class="tr-selects">
+            <select class="tr-sel" id="trFrom" aria-label="Origen"></select>
+            <span class="tr-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg></span>
+            <select class="tr-sel" id="trTo" aria-label="Destino"></select>
+          </div>
+          <div class="tr-types" id="trTypes"></div>
+          <button class="btn btn-solid" id="trGo" style="justify-content:center">
+            Ver tarifa
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </button>
+          <div class="tr-result" id="trResult"></div>
+        </div>
+        <div class="tr-list">
+          <h4>Tarifas referenciales vigentes</h4>
+          <div id="trList"></div>
+          <p class="tr-legal">* Precios referenciales por pasajero, actualizados por la Oficina de Atención al Vecino. En fechas y horarios nocturnos puede variar +S/ 1 – 2.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= INTEGRACIONES ================= -->
+  <section class="integra" id="integra">
+    <div class="wrap">
+      <div class="dir-head reveal">
+        <div>
+          <span class="label">09 — Puente digital</span>
+          <h2 class="sec-title" style="margin-top:16px">Integraciones <em>con el mundo</em></h2>
+          <p>Estado de las APIs conectadas a la plataforma. Las claves nunca viven en el frontend: se guardan en el servidor.</p>
+        </div>
+        <button class="btn btn-ghost" data-action="webhook-log-open">Ver webhooks recibidos</button>
+      </div>
+      <div class="int-tbl reveal">
+        <table>
+          <thead><tr><th>Servicio</th><th>Estado</th><th>Función</th><th></th></tr></thead>
+          <tbody id="intBody"></tbody>
+        </table>
+      </div>
+      <p class="int-note reveal">🔒 "Conectado" = llamada real sin clave (APIs abiertas). "Sandbox" = pasarela de prueba. "Demo" = simulación local lista para conectar.</p>
+    </div>
+  </section>
+
+  <!-- ================= TRANSFORMACIÓN DIGITAL ================= -->
+  <section class="transforma" id="transforma">
+    <div class="wrap">
+      <div class="dir-head reveal">
+        <div>
+          <span class="label">10 — Proyecto de transformación digital</span>
+          <h2 class="sec-title" style="margin-top:16px">Del puesto de siempre <em>a la plataforma</em></h2>
+        </div>
+      </div>
+
+      <div class="flow-cols reveal">
+        <div class="flow-card asis">
+          <h4>AS-IS · Proceso actual</h4>
+          <div class="flow-step">Cliente</div>
+          <div class="flow-step">Negocio físico</div>
+          <div class="flow-step">WhatsApp / llamadas</div>
+          <div class="flow-step">Pago manual</div>
+          <div class="flow-step">Registro manual</div>
+        </div>
+        <div class="flow-card tobe">
+          <h4>TO-BE · Plataforma La Joya</h4>
+          <div class="flow-step">Cliente</div>
+          <div class="flow-step">Catálogo digital</div>
+          <div class="flow-step">Carrito</div>
+          <div class="flow-step">Checkout</div>
+          <div class="flow-step">Pago (sandbox)</div>
+          <div class="flow-step">Webhook</div>
+          <div class="flow-step">Pedido al negocio</div>
+          <div class="flow-step">Entrega</div>
+        </div>
+      </div>
+
+      <div class="dir-head reveal" id="negocios" style="margin-top:56px">
+        <div>
+          <span class="label">Modelo de negocio</span>
+          <h2 class="sec-title" style="margin-top:16px">Marketplace local <em>sostenible</em></h2>
+        </div>
+      </div>
+      <div class="model-grid reveal">
+        <div class="model-card"><b>B2C</b><span>Vecinos compran a negocios del distrito con delivery y pagos digitales.</span></div>
+        <div class="model-card"><b>B2B</b><span>Negocios y agricultores venden por mayoro y gestionan su panel.</span></div>
+        <div class="model-card"><b>Marketplace</b><span>La plataforma conecta oferta y demanda local, y cobra comisión por venta.</span></div>
+      </div>
+      <div class="rev-chips reveal">
+        <span class="chip">Comisión por venta</span><span class="chip">Publicidad</span><span class="chip">Planes premium para negocios</span><span class="chip">Promoción destacada</span><span class="chip">Suscripciones</span><span class="chip">Servicios digitales</span>
+      </div>
+
+      <div class="dir-head reveal" style="margin-top:56px">
+        <div><span class="label">Base de datos</span><h2 class="sec-title" style="margin-top:16px">Modelo conceptual <em>(DER)</em></h2></div>
+      </div>
+      <div class="der-grid reveal" id="derGrid"></div>
+    </div>
+  </section>
+
+  <!-- ================= BANDA CTA ================= -->
+  <section class="cta-banda">
+    <div class="wrap cta-in reveal">
+      <div>
+        <h2>¿Aún tienes <em>dudas sobre La Joya?</em></h2>
+        <p>Pregúntale a Joya AI: productos, tarifas, horarios, trámites o empleos, responde al instante.</p>
+      </div>
+      <button class="btn btn-dark" data-action="chat-open">
+        Hablar con Joya AI
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+      </button>
+    </div>
+  </section>
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site" id="contacto">
+  <div class="wrap">
+    <div class="f-top">
+      <h2>Un valle que <em>crece contigo</em></h2>
+      <form class="f-news" id="newsForm" novalidate>
+        <input class="field" type="email" id="newsEmail" placeholder="Tu correo para el boletín del distrito" aria-label="Correo para el boletín">
+        <button class="btn btn-solid" type="submit">
+          Suscribirme
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+        </button>
+      </form>
+    </div>
+
+    <div class="f-grid">
+      <div class="f-brand">
+        <a class="brand" href="#inicio" style="color:var(--paper)">
+          <span class="brand-mark" style="background:var(--accent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></svg>
+          </span>
+          <span>La Joya<small style="color:rgba(244,239,227,.55)">Todo lo que buscas</small></span>
+        </a>
+        <p>Portal de promoción del distrito de La Joya, Arequipa. Plataforma demostrativa: los datos se guardan solo en tu navegador.</p>
+        <div class="f-social">
+          <a href="#" data-action="social" data-net="Facebook" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg></a>
+          <a href="#" data-action="social" data-net="Instagram" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+          <a href="#" data-action="social" data-net="WhatsApp" aria-label="WhatsApp"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></a>
+          <a href="#" data-action="social" data-net="TikTok" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/></svg></a>
+        </div>
+      </div>
+
+      <div class="f-col">
+        <h4>Portal</h4>
+        <ul>
+          <li><a href="#catalogo">Catálogo del distrito</a></li>
+          <li><a href="#directorio">Directorio de negocios</a></li>
+          <li><a href="#mapa">Mapa de La Joya</a></li>
+          <li><a href="#empleo">Bolsa de trabajo</a></li>
+          <li><a href="#transporte">Tarifas de transporte</a></li>
+          <li><a href="#negocios">Modelo para negocios</a></li>
+          <li><a href="#integra">Integraciones</a></li>
+          <li><button data-action="analytics-open" class="f-link">Analítica de La Joya</button></li>
+          <li><button data-action="panel-open" data-tab="dash" class="f-link">Panel de mi negocio</button></li>
+        </ul>
+      </div>
+
+      <div class="f-col">
+        <h4>Contacto</h4>
+        <ul>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>Plaza de Armas s/n, La Joya, Arequipa</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>(054) 451-230</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>hola@lajoya.gob.pe</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Lun – Vie 8–16 · Sáb 8–13</li>
+        </ul>
+      </div>
+
+      <div class="f-col">
+        <h4>Escríbenos</h4>
+        <form class="f-form" id="contactForm" novalidate>
+          <input class="field" type="text" id="cName" placeholder="Tu nombre" aria-label="Nombre">
+          <input class="field" type="email" id="cEmail" placeholder="Tu correo" aria-label="Correo">
+          <textarea class="field" id="cMsg" placeholder="¿En qué te ayudamos?" aria-label="Mensaje"></textarea>
+          <button class="btn btn-solid" type="submit" style="justify-content:center">Enviar mensaje</button>
+          <span class="form-msg" id="cMsgErr" role="alert"></span>
+        </form>
+      </div>
+    </div>
+
+    <div class="f-legal">
+      <button data-action="legal" data-doc="priv">Política de privacidad</button>
+      <button data-action="legal" data-doc="terms">Términos de servicio</button>
+      <button data-action="legal" data-doc="sec">Seguridad</button>
+      <button data-action="legal" data-doc="cookies">Cookies y datos locales</button>
+    </div>
+
+    <div class="f-bottom">
+      <p>© 2025 Municipalidad Distrital de La Joya — Arequipa, Perú. Tarifas y ofertas referenciales. <span class="demo-flag">Modo demostración</span></p>
+      <button class="to-top" id="toTop" data-action="to-top">
+        Volver arriba
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>
+      </button>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= POPUP DE BIENVENIDA ================= -->
+<div class="modal" id="popup" role="dialog" aria-modal="true" aria-labelledby="popTitle">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="pop-img"><img src="https://picsum.photos/seed/lajoya-postal/1000/440.jpg" alt="Postal de La Joya"></div>
+    <div class="pop-content">
+      <span class="label">Bienvenido al distrito</span>
+      <h3 id="popTitle">Recibe la guía de La Joya, gratis</h3>
+      <p>Feria, tarifas actualizadas, trámites, empleos y eventos. Un correo al mes, puro contenido del valle.</p>
+      <form class="pop-form" id="popForm" novalidate>
+        <input class="field" type="email" id="popEmail" placeholder="tucorreo@ejemplo.com" aria-label="Correo electrónico">
+        <button class="btn btn-solid" type="submit">Quiero mi guía</button>
+      </form>
+      <span class="form-msg" id="popErr" role="alert"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: POSTULAR A EMPLEO ================= -->
+<div class="modal" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="jobTitle">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="m-form">
+      <span class="label" style="color:var(--accent)">Postulación</span>
+      <h3 id="jobTitle">Postular a la vacante</h3>
+      <input class="plan-ro" id="jobVacante" readonly>
+      <input type="hidden" id="jobId">
+      <input class="field" type="text" id="jobName" placeholder="Nombres y apellidos" maxlength="80" aria-label="Nombre">
+      <input class="field" type="tel" id="jobPhone" placeholder="Celular / WhatsApp (9 dígitos)" maxlength="9" aria-label="Teléfono">
+      <textarea class="field" id="jobMsg" placeholder="Cuéntanos brevemente tu experiencia (opcional)" maxlength="400" aria-label="Experiencia"></textarea>
+      <button class="btn btn-solid" id="jobSend" data-action="job-send" style="justify-content:center">Enviar postulación</button>
+      <span class="form-msg" id="jobErr" role="alert"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ================= MODAL: PUBLICAR NEGOCIO ================= -->
+<div class="modal" id="bizModal" role="dialog" aria-modal="true" aria-labelledby="bizTitle">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="m-form">
+      <span class="label" style="color:var(--accent)">Alta de negocio</span>
+      <h3 id="bizTitle">Publica tu negocio en La Joya</h3>
+      <p>La municipalidad verifica tu ficha en máximo 48 horas. Los datos se guardan en tu navegador (demo).</p>
+      <div class="two-col">
+        <input class="field" type="text" id="bizName" placeholder="Nombre del negocio *" maxlength="60">
+        <select class="field" id="bizCat" aria-label="Rubro"></select>
+      </div>
+      <textarea class="field" id="bizDesc" placeholder="Describe tu negocio: qué vendes, qué te hace único…" maxlength="400"></textarea>
+      <div class="two-col">
+        <input class="field" type="tel" id="bizPhone" placeholder="Teléfono (9 dígitos) *" maxlength="9">
+        <input class="field" type="tel" id="bizWa" placeholder="WhatsApp (9 dígitos) *" maxlength="9">
+      </div>
+      <input class="field" type="email" id="bizEmail" placeholder="Correo del negocio *">
+      <div class="two-col">
+        <input class="field" type="text" id="bizAddr" placeholder="Dirección *" maxlength="100">
+        <input class="field" type="text" id="bizRef" placeholder="Referencia" maxlength="100">
+      </div>
+      <input class="field" type="text" id="bizHours" placeholder="Horario (ej: L–S 8:00–19:00 · D 7:00–13:00)">
+      <div class="two-col">
+        <input class="field" type="text" id="bizLat" placeholder="Latitud *" inputmode="decimal">
+        <input class="field" type="text" id="bizLng" placeholder="Longitud *" inputmode="decimal">
+      </div>
+      <button class="btn btn-ghost" data-action="pick-location" data-lat="#bizLat" data-lng="#bizLng" type="button" style="justify-content:center">
+        📍 Seleccionar ubicación en el mapa
+      </button>
+      <div class="two-col">
+        <input class="field" type="url" id="bizFb" placeholder="Facebook (URL)">
+        <input class="field" type="url" id="bizIg" placeholder="Instagram (URL)">
+      </div>
+      <input class="field" type="url" id="bizCover" placeholder="Imagen de portada (URL opcional)">
+      <div class="two-col">
+        <input class="field" type="text" id="bizOwner" placeholder="Nombre del responsable *" maxlength="60">
+        <input class="field" type="password" id="bizPass" placeholder="Crea una contraseña (demo) *" minlength="6">
+      </div>
+      <button class="btn btn-solid" data-action="biz-submit" style="justify-content:center">Publicar mi negocio</button>
+      <span class="form-msg" id="bizErr" role="alert"></span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: PRODUCTO ============ -->
+<div class="modal" id="mdProduct" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="mdProductBody"></div></div>
+</div>
+
+<!-- ============ MODAL: PERFIL DE NEGOCIO ============ -->
+<div class="modal" id="mdBusiness" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg biz-prof"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="mdBizBody"></div></div>
+</div>
+
+<!-- ============ MODAL: CARRITO ============ -->
+<div class="modal" id="mdCart" role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <h3 id="cartTitle">Tu carrito</h3>
+    <div class="cart-grid">
+      <div id="cartItems" class="cart-items"></div>
+      <aside class="cart-side">
+        <div class="coupon-row">
+          <input class="field" type="text" id="couponInput" placeholder="Cupón (prueba JOYA10)" maxlength="20">
+          <button class="btn btn-ghost" data-action="coupon-apply">Aplicar</button>
+        </div>
+        <span class="form-msg" id="couponMsg" role="status"></span>
+        <div id="cartTotals" class="sum-box"></div>
+        <button class="btn btn-solid" data-action="checkout-open" style="width:100%;justify-content:center">Finalizar compra</button>
+        <div class="cart-foot-btns">
+          <button class="btn btn-ghost" data-action="cart-continue">Continuar comprando</button>
+          <button class="btn btn-ghost danger" data-action="clear-cart">Vaciar carrito</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: CHECKOUT ============ -->
+<div class="modal" id="mdCheckout" role="dialog" aria-modal="true" aria-labelledby="ckTitle">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-xl ck">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <header class="ck-head"><h3 id="ckTitle">Finalizar compra</h3><ol class="ck-steps" id="ckSteps"></ol></header>
+    <div class="ck-grid"><div class="ck-body" id="ckBody"></div><aside class="ck-side" id="ckSide"></aside></div>
+  </div>
+</div>
+
+<!-- ============ MODAL: MIS PEDIDOS ============ -->
+<div class="modal" id="mdOrders" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><h3>Mis pedidos</h3><div id="ordersList" class="orders-list"></div></div>
+</div>
+
+<!-- ============ MODAL: DETALLE DE PEDIDO ============ -->
+<div class="modal" id="mdOrder" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="mdOrderBody"></div></div>
+</div>
+
+<!-- ============ MODAL: WEBHOOK ============ -->
+<div class="modal" id="mdWebhook" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-md"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="whBody"></div></div>
+</div>
+
+<!-- ============ MODAL: AUTENTICACIÓN ============ -->
+<div class="modal" id="mdAuth" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-md">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <div class="m-form">
+      <div class="acct-tabs">
+        <button class="on" data-action="auth-tab" data-tab="login">Ingresar</button>
+        <button data-action="auth-tab" data-tab="register">Crear cuenta</button>
+      </div>
+      <form class="auth-pane on" id="authLogin" novalidate>
+        <input class="field" type="email" id="authEmail" placeholder="Correo electrónico" aria-label="Correo">
+        <input class="field" type="password" id="authPass" placeholder="Contraseña" aria-label="Contraseña">
+        <button class="btn btn-solid" type="submit" style="justify-content:center">Identifícate</button>
+        <div class="demo-row" style="flex-wrap:wrap;justify-content:center">
+          <button type="button" class="btn btn-ghost sm" data-action="login-demo" data-role="vecino">Demo vecino</button>
+          <button type="button" class="btn btn-ghost sm" data-action="login-demo" data-role="negocio">Demo negocio</button>
+          <button type="button" class="btn btn-ghost sm" data-action="login-demo" data-role="admin" style="border-color:var(--accent);color:var(--accent)">Demo admin</button>
+        </div>
+        <p class="hint">Cuentas demo: <b>vecino@lajoya.pe</b> · <b>negocio@lajoya.pe</b> · <b>admin@lajoya.pe</b> — clave: <b>demo123</b></p>
+        <span class="form-msg" id="authErr" role="alert"></span>
+      </form>
+      <form class="auth-pane" id="authRegister" novalidate>
+        <input class="field" type="text" id="regName" placeholder="Nombres y apellidos *" maxlength="60">
+        <input class="field" type="email" id="regEmail" placeholder="Correo electrónico *">
+        <div class="two-col">
+          <input class="field" type="tel" id="regPhone" placeholder="Celular (9 dígitos)" maxlength="9">
+          <input class="field" type="password" id="regPass" placeholder="Contraseña (mín. 6) *" minlength="6">
+        </div>
+        <div class="two-col">
+          <select class="field" id="regRole" aria-label="Tipo de cuenta"><option value="vecino">Soy vecino / comprador</option><option value="negocio">Tengo un negocio</option></select>
+          <input class="field" type="text" id="regBizName" placeholder="Nombre del negocio (si aplica)" maxlength="60">
+        </div>
+        <button class="btn btn-solid" type="submit" style="justify-content:center">Crear mi cuenta</button>
+        <p class="hint">⚠️ Modo demostración: no uses una contraseña real. Los datos se guardan solo en este navegador.</p>
+        <span class="form-msg" id="regErr" role="alert"></span>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: MI CUENTA ============ -->
+<div class="modal" id="mdProfile" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="profBody"></div></div>
+</div>
+
+<!-- ============ MODAL: FAVORITOS ============ -->
+<div class="modal" id="mdFavs" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-lg"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="favsBody"></div></div>
+</div>
+
+<!-- ============ MODAL: PANEL DE NEGOCIO ============ -->
+<div class="modal" id="mdPanel" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card panel"><div id="panelBody"></div></div>
+</div>
+
+<!-- ============ MODAL: ANALÍTICA ============ -->
+<div class="modal" id="mdAnalytics" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-xl"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="anBody"></div></div>
+</div>
+
+<!-- ============ MODAL: DOCUMENTOS LEGALES ============ -->
+<div class="modal" id="mdLegal" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-md legal"><button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button><div id="legalBody"></div></div>
+</div>
+
+<!-- ============ MODAL: MAPA (ficha/selector) ============ -->
+<div class="modal" id="mdMap" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-xl map-modal">
+    <button class="modal-x" data-close aria-label="Cerrar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    <h3 id="mdMapTitle">Ubicación</h3>
+    <div id="mapModalMap"></div>
+    <p class="hint" id="mdMapHint"></p>
+  </div>
+</div>
+
+<!-- ============ MODAL: CONFIRMAR ============ -->
+<div class="modal" id="mdConfirm" role="dialog" aria-modal="true">
+  <div class="modal-bg" data-close></div>
+  <div class="modal-card md-sm confirm">
+    <p id="cfMsg">¿Confirmas esta acción?</p>
+    <div class="cf-btns">
+      <button class="btn btn-ghost" data-action="confirm-no">Cancelar</button>
+      <button class="btn btn-solid" data-action="confirm-yes">Sí, confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= JOYA AI ================= -->
+<button id="chatFab" class="chat-fab" data-action="chat-toggle" aria-label="Abrir Joya AI">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3Z"/></svg>
+  <span>Joya AI</span>
+</button>
+<section id="chatPanel" class="chat-panel" aria-hidden="true">
+  <header class="chat-head">
+    <div><b>Joya AI</b><span>Asistente del distrito · modo demostración</span></div>
+    <button data-action="chat-toggle" aria-label="Cerrar chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+  </header>
+  <div class="chat-body" id="chatBody"></div>
+  <div class="chat-quick" id="chatQuick"></div>
+  <form class="chat-form" id="chatForm">
+    <input id="chatInput" placeholder="Pregúntame por productos, tarifas, empleos…" autocomplete="off" maxlength="200">
+    <button class="btn btn-solid" type="submit">Enviar</button>
+  </form>
+</section>
+
+<!-- ================= TOASTS / COOKIE ================= -->
+<div id="toasts" class="toasts" aria-live="polite"></div>
+<div id="cookieBar" class="cookie-bar" hidden>
+  <button class="cookie-x" data-action="cookie-accept" aria-label="Cerrar aviso" style="background:transparent;border:none;color:#fff;font-size:1.6rem;cursor:pointer;padding:0 8px;align-self:center;line-height:1">×</button>
+  <p>🍪 Usamos <b>localStorage</b> para guardar tu carrito, favoritos y sesión en este navegador (demo). <button class="f-link" data-action="legal" data-doc="cookies">Más información</button></p>
+  <button class="btn btn-solid sm" data-action="cookie-accept">Aceptar</button>
+</div>
+
+</body>
+</html>
